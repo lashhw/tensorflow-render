@@ -87,7 +87,7 @@ async def analyze(request):
     img = img.resize((img_size, img_size), Image.NEAREST)
     img = np.array(img)
     #img = preprocess_input( np.array([img]) )
-    predictions = learn.predict(img)  
+    predictions = learn.predict(np.expand_dims(img, axis=0))
     prediction = predictions.argmax()
     return JSONResponse({'result': str(prediction)})
 
