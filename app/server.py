@@ -18,7 +18,6 @@ from starlette.staticfiles import StaticFiles
 
 #set url
 # export_file_url = 'https://drive.google.com/uc?export=download&id=1ZZ_2JRe39KcgqGu75watpeLOtQGfeDPA'
-model_config_name = 'app/models/model.config'
 model_file_name = 'app/models/best_model.h5'
 
 classes = ['0', '1', '2', '3', '4']
@@ -43,10 +42,11 @@ async def setup_learner():
     try:
         #learn = load_learner(path, export_file_name)        
         #learn = keras.models.load_model("app/"+export_file_name)
-        with open(model_config_name, "r") as text_file:
-            json_string = text_file.read()
-        learn = keras.models.model_from_json(json_string)
-        learn.load_weights(model_file_name)
+        learn = keras.models.load_model(model_file_name)
+        learn.compile(
+          loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+          metrics=['accuracy']
+        )
         #learn = keras.models.load_model(model_path)
         
         return learn
@@ -86,7 +86,7 @@ async def analyze(request):
     img = img.convert('RGB')
     img = img.resize((img_size, img_size), Image.NEAREST)
     img = np.array(img)
-    img = preprocess_input( np.array([img]) )
+    #img = preprocess_input( np.array([img]) )
     predictions = learn.predict(img)  
     prediction = predictions.argmax()
     return JSONResponse({'result': str(prediction)})
